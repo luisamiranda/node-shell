@@ -1,13 +1,18 @@
-var fs = require('fs');
+
+'use strict';
+
+const fs = require('fs');
 
 module.exports = {
-  pwd: function(str) {
+  pwd: function(args) {
     process.stdout.write(process.cwd());
+    process.stdout.write('\nprompt > ');
   },
-  date: function(str) {
-    process.stdout.write("Mon Jan 16 10:43:59 EST 2017");
+  date: function(args) {
+    process.stdout.write(Date());
+    process.stdout.write('\nprompt > ');
   },
-  ls: function(str){
+  ls: function(args){
     fs.readdir('.', function(err, files) {
       if (err) throw err;
       files.forEach(function(file) {
@@ -16,34 +21,46 @@ module.exports = {
       process.stdout.write("prompt > ");
       });
   },
-  echo: function(str){
-    // if (str === "$PATH") {
-    //   fs.realpath(str, 'utf8', (err,data) => {
-    //     if (err) throw err;
-    //     console.log(data);
-    // });
-  // } else {
-    process.stdout.write(str);
-  // }
+  echo: function(args){
+    const output = args
+    .split(' ')
+    .map(function (arg) {
+      return (arg[0] === '$') ? process.env[arg.slice(1)] : arg;
+    })
+    .join(' ');
+    process.stdout.write(output);
+    process.stdout.write('\nprompt > ');
   },
-  cat: function (filename) {
-    fs.readFile(filename, 'utf8', (err, data) => {
-      if (err) throw err;
-      console.log(data);
+  cat: function (args) {
+    var filenames = args.split(' ');
+    var texts = []
+    var count = 0;
+    filenames.forEach(function(filename, i) {
+      fs.readFile(filename, 'utf8', function (err, data) {
+        if (err) throw err;
+        texts[i] = data;
+        count++;
+        if (count === filenames.length){
+          process.stdout.write(texts.join(' '));
+          process.stdout.write('\nprompt > ');
+        }
+      });
     });
   },
   head: function (filename) {
     fs.readFile(filename, 'utf8', (err, data) => {
       if (err) throw err;
-      var headData = data.split("\n").slice(0,5).join("\n");
-      console.log(headData);
+      var headData = data.split("\n").slice(0,4).join("\n");
+      process.stdout.write(texts.join(' '));
+      process.stdout.write('\nprompt > ');
     });
   },
   tail: function (filename) {
     fs.readFile(filename, 'utf8', (err, data) => {
       if (err) throw err;
-      var tailData = data.split("\n").slice(-6).join("\n");
-      console.log(tailData);
+      var tailData = data.split("\n").slice(-5).join("\n");
+      process.stdout.write(texts.join(' '));
+      process.stdout.write('\nprompt > ');
     });
   },
   sort: function(filename){
@@ -52,5 +69,6 @@ module.exports = {
       var lines = data.split("\n").sort().join("\n")
       console.log(lines);
     });
+    process.stdout.write('\nprompt > ');
   }
 }
